@@ -41,7 +41,9 @@ public class BaseHtmlParser {
 
     private File getCacheFileById(final String id) {
         File tempDir = new File("C:\\temp\\caches");
-        if (!tempDir.exists()) tempDir.mkdirs();
+        if (!tempDir.exists()) {
+            if (!tempDir.mkdirs()) throw new RuntimeException("Unable to create temp dir.");
+        }
         String fullFileName = String.format("%s%s%s.cache", tempDir.getAbsolutePath(), File.separator, id);
         log.info(String.format("Cache filename for '%s' is '%s'", id, fullFileName));
         return new File(fullFileName);
@@ -50,7 +52,7 @@ public class BaseHtmlParser {
     public String getURLCached(String urlString) throws Exception {
         assert urlString != null;
 
-        String content = null;
+        String content;
         content = getCachedStringById(urlString);
         if (content != null) {
             log.info(String.format("Hit cache for '%s'", urlString));
@@ -88,7 +90,6 @@ public class BaseHtmlParser {
 
     public Document parseDocumentFromURL(final String htmlURL) throws Exception {
         String indexHtml = getURLCached(htmlURL);
-        Document parse = Jsoup.parse(indexHtml, htmlURL);
-        return parse;
+        return Jsoup.parse(indexHtml, htmlURL);
     }
 }

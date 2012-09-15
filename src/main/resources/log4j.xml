@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+    <appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%-5p [%t] (%x) %c:%M(%L) | %m%n"/>
+            <!--
+            For reference: (from http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/PatternLayout.html)
+            p: Used to output the priority of the logging event.
+            t: Used to output the name of the thread that generated the logging event.
+            x: Used to output the NDC (nested diagnostic context), done by a filter (request URI)
+            c: Used to output the category of the logging event. If a precision specifier is given, then only the corresponding number of right most components of the category name will be printed
+            M: Used to output the method name where the logging request was issued. (Slow)
+            L: Used to output the line number from where the logging request was issued. (Slow)
+            m: Used to output the application supplied message associated with the logging event.
+            n: Outputs the platform dependent line separator character or characters.
+            -->
+        </layout>
+    </appender>
+
+
+    <appender name="SYSLOG" class="org.apache.log4j.net.SyslogAppender">
+
+        <param name="SyslogHost" value="127.0.0.1"/>
+        <param name="Facility" value="USER"/>
+        <param name="FacilityPrinting" value="true"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern"
+                   value="emailHandler %p %c:%M(%L) | %m%n"/>
+        </layout>
+    </appender>
+
+
+    <logger name="br.com.me">
+        <level value="INFO"/>
+        <!-- change to DEBUG for really uninteresting messages -->
+    </logger>
+
+
+    <root>
+        <level value="INFO"/>
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="SYSLOG"/>
+    </root>
+
+
+</log4j:configuration>

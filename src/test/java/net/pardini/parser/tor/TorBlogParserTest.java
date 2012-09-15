@@ -1,6 +1,9 @@
 package net.pardini.parser.tor;
 
+import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -10,8 +13,13 @@ import org.testng.annotations.Test;
  * To change this template use File | Settings | File Templates.
  */
 public class TorBlogParserTest {
+// -------------------------- OTHER METHODS --------------------------
+
     @Test
     public void testParseIndex() throws Exception {
-
+        TorBlogParser torBlogParser = new TorBlogParser();
+        Map<String,String> stringStringMap = torBlogParser.parseIndex();
+        Assert.assertNotNull(stringStringMap);
+        Assert.assertTrue(stringStringMap.keySet().size() > 0);
     }
 }

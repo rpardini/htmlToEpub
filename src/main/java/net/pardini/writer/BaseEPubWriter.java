@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 import org.w3c.tidy.Node;
 import org.w3c.tidy.Tidy;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.*;
@@ -37,7 +39,7 @@ public class BaseEPubWriter {
 // --------------------------- CONSTRUCTORS ---------------------------
 
     public BaseEPubWriter() {
-        images = new HashSet<String>();
+        images = new LinkedHashSet<String>();
     }
 
 // -------------------------- OTHER METHODS --------------------------
@@ -121,9 +123,6 @@ public class BaseEPubWriter {
         book.getMetadata().addContributor(contributor);
         book.getMetadata().addDate(new nl.siegmann.epublib.domain.Date(new Date(), nl.siegmann.epublib.domain.Date.Event.CREATION));
 
-        // Set cover image
-        //book.getMetadata().setCoverImage(new Resource(getClass().getResourceAsStream("/book1/test_cover.png"), "cover.png"));
-
         this.title = title;
         this.book = book;
     }
@@ -132,8 +131,31 @@ public class BaseEPubWriter {
         new File(String.format("target\\html\\%s", title)).mkdirs();
 
         // Now get and add all images!
+        Resource largestImageResource = null;
+        int largestImageSize = 0;
+
+
+
         for (String imageURL : images) {
-            book.addResource(new Resource(CacheUtils.getURLCachedByteArray(imageURL), CacheUtils.getIDForImage(imageURL)));
+            Resource resource = new Resource(CacheUtils.getURLCachedByteArray(imageURL), CacheUtils.getIDForImage(imageURL));
+            book.addResource(resource);
+
+            BufferedImage bimg = ImageIO.read(new ByteArrayInputStream(resource.getData()));
+            int width          = bimg.getWidth();
+            int height         = bimg.getHeight();
+            int pixelsSquared = width * height;
+
+            if (pixelsSquared >= 344*258) continue;
+
+            if (pixelsSquared > largestImageSize) {
+                largestImageSize = pixelsSquared;
+                largestImageResource = resource;
+            }
+        }
+
+        // Set cover image
+        if (largestImageResource != null) {
+            book.setCoverImage(largestImageResource);
         }
 
 

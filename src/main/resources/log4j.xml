@@ -21,19 +21,7 @@
     </appender>
 
 
-    <appender name="SYSLOG" class="org.apache.log4j.net.SyslogAppender">
-
-        <param name="SyslogHost" value="127.0.0.1"/>
-        <param name="Facility" value="USER"/>
-        <param name="FacilityPrinting" value="true"/>
-        <layout class="org.apache.log4j.PatternLayout">
-            <param name="ConversionPattern"
-                   value="emailHandler %p %c:%M(%L) | %m%n"/>
-        </layout>
-    </appender>
-
-
-    <logger name="br.com.me">
+    <logger name="net.pardini">
         <level value="INFO"/>
         <!-- change to DEBUG for really uninteresting messages -->
     </logger>
@@ -42,7 +30,6 @@
     <root>
         <level value="INFO"/>
         <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="SYSLOG"/>
     </root>
 
 

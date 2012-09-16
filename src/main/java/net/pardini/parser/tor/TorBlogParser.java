@@ -25,6 +25,29 @@ public class TorBlogParser extends BaseHtmlParser {
 
 // -------------------------- OTHER METHODS --------------------------
 
+    public RereadBooks parseFullWOTRereadFromTorWebSite() throws Exception {
+        Map<String, Map<String, String>> fullMap = this.parseIndex();
+
+        Map<String, List<Chapter>> fullBook = new LinkedHashMap<String, List<Chapter>>();
+        RereadBooks rereadBooks = new RereadBooks();
+
+        for (String bookName : fullMap.keySet()) {
+            RereadBook rereadBook = new RereadBook(bookName);
+
+            Map<String, String> bookChapters = fullMap.get(bookName);
+            for (String title : bookChapters.keySet()) {
+                String url = bookChapters.get(title);
+                Chapter chapter = new Chapter(bookName, title, url);
+                chapter.parseHTML();
+
+                rereadBook.chapterList.add(chapter);
+            }
+
+            rereadBooks.bookList.add(rereadBook);
+        }
+        return rereadBooks;
+    }
+
     public Map<String, Map<String, String>> parseIndex() throws Exception {
         String htmlURL = "http://www.tor.com/features/series/wot-reread";
         Document document = parseDocumentFromURL(htmlURL);
@@ -41,47 +64,34 @@ public class TorBlogParser extends BaseHtmlParser {
             Elements links = element.select("a");
             for (Element link : links) {
                 String href = link.attr("abs:href");
-                String linkTitle = link.text();
+                String fullId = link.text();
+                log.debug(String.format("Adding '%s' '%s' to url '%s'", bookTitle, fullId, href));
 
-                String fullId = linkTitle;
-                log.info(String.format("Adding '%s' '%s' to url '%s'", bookTitle, fullId, href));
                 urlMap.put(fullId, href);
             }
 
             fullMap.put(bookTitle, urlMap);
-
         }
         return fullMap;
     }
 
-    public Map<String, List<Chapter>> parseChapters() throws Exception {
-        Map<String, Map<String, String>> fullMap = this.parseIndex();
+// -------------------------- INNER CLASSES --------------------------
 
-        Map<String, List<Chapter>> fullBook = new LinkedHashMap<String, List<Chapter>>();
-
-
-        for (String bookName : fullMap.keySet()) {
-            List<Chapter> listChapters = new ArrayList<Chapter>();
-            Map<String, String> bookChapters = fullMap.get(bookName);
-            for (String title : bookChapters.keySet()) {
-                String url = bookChapters.get(title);
-                Chapter chapter = new Chapter(bookName, title, url);
-                chapter.parseHTML();
-                listChapters.add(chapter);
-            }
-
-            fullBook.put(bookName, listChapters);
-
-
-        }
-        return fullBook;
+    public class RereadBooks {
+        public List<RereadBook> bookList = new ArrayList<RereadBook>();
     }
 
+    public class RereadBook {
+        public final String bookTitle;
+        public List<Chapter> chapterList = new ArrayList<Chapter>();
 
 
+        public RereadBook(final String bookTitle) {
+            this.bookTitle = bookTitle;
+        }
+    }
 
     public class Chapter {
-
         public final String bookName;
         public final String title;
         public final String url;
@@ -89,22 +99,29 @@ public class TorBlogParser extends BaseHtmlParser {
         public Set<String> images = new HashSet<String>();
 
         public Chapter(final String bookName, final String title, final String url) {
-            log.info(String.format("Constructing Chapter for book '%s' title '%s' and url '%s'", bookName, title, url));
+            log.debug(String.format("Constructing Chapter for book '%s' title '%s' and url '%s'", bookName, title, url));
             this.bookName = bookName;
             this.title = title;
             this.url = url;
         }
 
         public void parseHTML() throws Exception {
-            Document document = parseDocumentFromURL(url);
+            Map<String, String> mappedFixes = new HashMap<String, String>();
+            mappedFixes.put("<span style=\"font-size:14px;&ldquo;>", "<span style=\"font-size:14px;\">");
+            mappedFixes.put("<span style=\"font-size: 14px;&ldquo;>", "<span style=\"font-size:14px;\">");
+            mappedFixes.put("<span new=\"\" roman=\"\" style=\"font-family: Georgia;\" times=\"\"> </span>", "");
+
+
+            Document document = parseDocumentFromURL(url, mappedFixes);
             Element mainElement = document.select("div.content div.text").get(0);
 
             // Fix all a href links.
             Elements allLinks = mainElement.select("a");
             for (Element oneLink : allLinks) {
                 String href = StringUtils.trimToNull(oneLink.attr("abs:href"));
-                if (href!=null) {
-                    log.info(String.format("Found link: %s", href));
+                if (href != null) {
+                    log.debug(String.format("Found link: %s", href));
+                    // @TODO: actually does nothing with the links. What should we do?
                 }
             }
 
@@ -112,7 +129,7 @@ public class TorBlogParser extends BaseHtmlParser {
             for (Element oneImage : allImages) {
                 String src = StringUtils.trimToNull(oneImage.attr("abs:src"));
                 if (src != null) {
-                    log.info(String.format("Found image link: %s", src));
+                    log.debug(String.format("Found image link: %s", src));
                     String md5 = CacheUtils.getIDForImage(src);
                     oneImage.attr("src", md5);
                     images.add(src);
@@ -122,8 +139,5 @@ public class TorBlogParser extends BaseHtmlParser {
 
             this.html = mainElement.html();
         }
-
-
-
     }
 }

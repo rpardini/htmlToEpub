@@ -1,6 +1,7 @@
 package net.pardini.writer;
 
 import net.pardini.parser.tor.TorBlogParser;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /**
@@ -11,10 +12,29 @@ import org.testng.annotations.Test;
  * To change this template use File | Settings | File Templates.
  */
 public class WOTRereadEpubWriterTest {
+
+    private TorBlogParser.RereadBooks fullBook;
+
+    @BeforeMethod
+    public void setUp() throws Exception {
+        fullBook = new TorBlogParser().parseFullWOTRereadFromTorWebSite();
+    }
+
     @Test
-    public void testWriteEpub() throws Exception {
+    public void testWriteCompleteEpub() throws Exception {
         WOTRereadEpubWriter wotRereadEpubWriter = new WOTRereadEpubWriter();
-        wotRereadEpubWriter.writeEpub(new TorBlogParser().parseChapters());
+        wotRereadEpubWriter.writeCompleteEpub(fullBook);
 
     }
+
+    @Test
+    public void testWriteIndividualEbooksEpubs() throws Exception {
+
+        for (TorBlogParser.RereadBook rereadBook : fullBook.bookList) {
+            WOTRereadEpubWriter wotRereadEpubWriter = new WOTRereadEpubWriter();
+            wotRereadEpubWriter.writeIndividualBookEpub(rereadBook);
+        }
+    }
+
+
 }

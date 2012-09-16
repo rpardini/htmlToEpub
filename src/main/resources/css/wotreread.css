@@ -1,0 +1,11 @@
+blockquote {
+    border-left: 1px solid silver;
+    padding-left: 2em;
+}
+
+
+img.blog-pic-right-align  {
+    float: left;
+    padding-right: 1em;
+    padding-bottom: 1em;
+}

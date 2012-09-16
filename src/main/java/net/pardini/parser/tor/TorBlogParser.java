@@ -1,6 +1,7 @@
 package net.pardini.parser.tor;
 
 import net.pardini.parser.BaseHtmlParser;
+import net.pardini.parser.CacheUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -85,7 +86,7 @@ public class TorBlogParser extends BaseHtmlParser {
         public final String title;
         public final String url;
         public String html;
-        public Map<String, byte[]> images = new HashMap<String, byte[]>();
+        public Set<String> images = new HashSet<String>();
 
         public Chapter(final String bookName, final String title, final String url) {
             log.info(String.format("Constructing Chapter for book '%s' title '%s' and url '%s'", bookName, title, url));
@@ -112,12 +113,16 @@ public class TorBlogParser extends BaseHtmlParser {
                 String src = StringUtils.trimToNull(oneImage.attr("abs:src"));
                 if (src != null) {
                     log.info(String.format("Found image link: %s", src));
+                    String md5 = CacheUtils.getIDForImage(src);
+                    oneImage.attr("src", md5);
+                    images.add(src);
                 }
             }
 
 
             this.html = mainElement.html();
         }
+
 
 
     }

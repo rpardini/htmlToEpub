@@ -1,5 +1,7 @@
 package net.pardini.writer;
 
+import net.pardini.parser.BaseHtmlParser;
+import net.pardini.parser.CacheUtils;
 import net.pardini.parser.tor.TorBlogParser;
 import nl.siegmann.epublib.domain.Author;
 import nl.siegmann.epublib.domain.Book;
@@ -13,9 +15,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.nio.charset.Charset;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -51,6 +51,7 @@ public class WOTRereadEpubWriter {
         //book.getMetadata().setCoverImage(new Resource(getClass().getResourceAsStream("/book1/test_cover.png"), "cover.png"));
 
 
+        Set<String> images = new HashSet<String>();
 
         for (String bookTitle : fullBook.keySet()) {
             List<TorBlogParser.Chapter> chapters = fullBook.get(bookTitle);
@@ -61,8 +62,21 @@ public class WOTRereadEpubWriter {
                 Resource htmlForContentRes = getHtmlForContentRes(chapter.html, String.format("%s - %s", bookTitle, chapter.title));
                 FileUtils.writeByteArrayToFile(new File(String.format("target\\html\\%d - %s - %s.html", chapterCounter, bookTitle, chapter.title)), htmlForContentRes.getData());
                 book.addSection(bookEntry, chapter.title, htmlForContentRes);
+
+                for (String imageURL : chapter.images) {
+                    images.add(imageURL);
+                }
             }
         }
+
+        BaseHtmlParser parser = new BaseHtmlParser();
+
+        // Now get and add all images!
+        for (String imageURL : images) {
+            String imageID = CacheUtils.getIDForImage(imageURL);
+            book.addResource(new Resource(parser.getURLCachedByteArray(imageURL), imageID));
+        }
+
 
         // Create EpubWriter
         EpubWriter epubWriter = new EpubWriter();

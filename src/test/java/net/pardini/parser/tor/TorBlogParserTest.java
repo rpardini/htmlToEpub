@@ -3,6 +3,7 @@ package net.pardini.parser.tor;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -18,8 +19,17 @@ public class TorBlogParserTest {
     @Test
     public void testParseIndex() throws Exception {
         TorBlogParser torBlogParser = new TorBlogParser();
-        Map<String,String> stringStringMap = torBlogParser.parseIndex();
+        Map<String, Map<String, String>> stringStringMap = torBlogParser.parseIndex();
         Assert.assertNotNull(stringStringMap);
         Assert.assertTrue(stringStringMap.keySet().size() > 0);
+    }
+
+
+    @Test
+    public void testListChapters() throws Exception {
+        TorBlogParser torBlogParser = new TorBlogParser();
+        Map<String, List<TorBlogParser.Chapter>> chapterList = torBlogParser.parseChapters();
+        Assert.assertNotNull(chapterList);
+
     }
 }

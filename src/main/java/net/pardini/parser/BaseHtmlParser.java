@@ -31,7 +31,7 @@ public class BaseHtmlParser {
 
 
         String contents = IOUtils.toString(cacheFile.toURI());
-        log.info("Got contents for cache.");
+        //log.info("Got contents for cache.");
         return contents;
     }
 
@@ -44,8 +44,8 @@ public class BaseHtmlParser {
         if (!tempDir.exists()) {
             if (!tempDir.mkdirs()) throw new RuntimeException("Unable to create temp dir.");
         }
-        String fullFileName = String.format("%s%s%s.cache", tempDir.getAbsolutePath(), File.separator, id);
-        log.info(String.format("Cache filename for '%s' is '%s'", id, fullFileName));
+        String fullFileName = String.format("%s%s%s.html", tempDir.getAbsolutePath(), File.separator, id);
+        //log.info(String.format("Cache filename for '%s' is '%s'", id, fullFileName));
         return new File(fullFileName);
     }
 
@@ -55,11 +55,11 @@ public class BaseHtmlParser {
         String content;
         content = getCachedStringById(urlString);
         if (content != null) {
-            log.info(String.format("Hit cache for '%s'", urlString));
+            //log.info(String.format("Hit cache for '%s'", urlString));
             return content;
         }
 
-        log.info(String.format("Cache miss for '%s'", urlString));
+        log.warn(String.format("Cache miss for '%s'", urlString));
 
         URL url = stringToURL(urlString);
         content = readURLContent(url);

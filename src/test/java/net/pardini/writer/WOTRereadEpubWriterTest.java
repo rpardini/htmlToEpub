@@ -1,5 +1,6 @@
 package net.pardini.writer;
 
+import net.pardini.parser.tor.TorBlogParser;
 import org.testng.annotations.Test;
 
 /**
@@ -13,7 +14,7 @@ public class WOTRereadEpubWriterTest {
     @Test
     public void testWriteEpub() throws Exception {
         WOTRereadEpubWriter wotRereadEpubWriter = new WOTRereadEpubWriter();
-        wotRereadEpubWriter.writeEpub();
+        wotRereadEpubWriter.writeEpub(new TorBlogParser().parseChapters());
 
     }
 }

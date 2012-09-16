@@ -45,7 +45,10 @@ public class BaseEPubWriter {
 // -------------------------- OTHER METHODS --------------------------
 
     public Resource getHtmlForContentRes(String content, String contentTitle, final String url) {
-        return new Resource(this.getHtmlDocForContent(content, contentTitle, url), String.format("%s.html", contentTitle));
+        String href = String.format("%s.html", contentTitle);
+        href = StringUtils.replace(href, ":", "");
+        log.info(String.format("Writing HREF... '%s'", href));
+        return new Resource(this.getHtmlDocForContent(content, contentTitle, url), href);
     }
 
     public byte[] getHtmlDocForContent(String content, String contentTitle, String url) {

@@ -57,7 +57,16 @@ public class WOTRereadEpubWriter extends BaseEPubWriter {
         for (TorBlogParser.Chapter chapter : rereadBook.chapterList) {
             log.debug(String.format("Writing chapter %s: %s", rereadBook.bookTitle, chapter.title));
 
-            book.addSection(chapter.title, getHtmlForContentRes(chapter.html, String.format("%s - %s", rereadBook.bookTitle, chapter.title), chapter.url));
+            for (TorBlogParser.ChapterSection section : chapter.sections) {
+                book.addSection(
+                        String.format("%s - %s", chapter.title, section.sectionTitle),
+                        getHtmlForContentRes(
+                                section.getHTML(),
+                                String.format("%s - %s - %s", rereadBook.bookTitle, chapter.title, section.sectionTitle),
+                                chapter.url
+                        )
+                );
+            }
 
             addImagesForChapter(chapter);
         }

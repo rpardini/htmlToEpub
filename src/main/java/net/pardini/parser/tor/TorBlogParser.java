@@ -5,6 +5,7 @@ import net.pardini.parser.CacheUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.parser.Tag;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,6 +78,17 @@ public class TorBlogParser extends BaseHtmlParser {
 
 // -------------------------- INNER CLASSES --------------------------
 
+    public class ChapterSection {
+        public String sectionTitle;
+        public Element separatorElement;
+        public Elements elements;
+        public Elements icons;
+
+        public String getHTML() {
+            return elements.outerHtml();
+        }
+    }
+
     public class RereadBooks {
         public List<RereadBook> bookList = new ArrayList<RereadBook>();
     }
@@ -97,6 +109,7 @@ public class TorBlogParser extends BaseHtmlParser {
         public final String url;
         public String html;
         public Set<String> images = new HashSet<String>();
+        public List<ChapterSection> sections;
 
         public Chapter(final String bookName, final String title, final String url) {
             log.debug(String.format("Constructing Chapter for book '%s' title '%s' and url '%s'", bookName, title, url));
@@ -137,7 +150,115 @@ public class TorBlogParser extends BaseHtmlParser {
             }
 
 
+            List<ChapterSection> chapterSectionList = new ArrayList<ChapterSection>();
+
+            Elements allPossibleTitleElements = new Elements();
+            allPossibleTitleElements.addAll(mainElement.select("p strong u"));
+            allPossibleTitleElements.addAll(mainElement.select("p u strong"));
+
+            for (Element titleElement : allPossibleTitleElements) {
+                String sectionTitleText = StringUtils.trimToNull(titleElement.text());
+                if (sectionTitleText == null) {
+                    continue;
+                }
+                log.info(String.format("Found title: %s - %s - %s", this.title, sectionTitleText, this.url));
+
+                Element parentParagraph = findParentElementBefore(titleElement, mainElement);
+                if (parentParagraph != null) {
+                    log.info("Found parent..." + parentParagraph.html());
+
+                    ChapterSection section = new ChapterSection();
+                    section.sectionTitle = sectionTitleText;
+                    section.separatorElement = parentParagraph;
+
+                    section.icons = parentParagraph.select("img");
+
+
+                    chapterSectionList.add(section);
+
+                }
+            }
+
+            Elements directChildren = mainElement.children();
+            Elements accumulatedElements = new Elements();
+
+            ChapterSection previousSection = new ChapterSection();
+            previousSection.sectionTitle = "Main";
+
+            this.sections = new ArrayList<ChapterSection>();
+            this.sections.add(previousSection);
+
+            for (Element directChild : directChildren) {
+                boolean isSeparator = false;
+
+                for (ChapterSection section : chapterSectionList) {
+
+                    if (section.separatorElement.equals(directChild)) {
+                        isSeparator = true;
+
+                        log.info("Found splitter element...");
+
+                        previousSection.elements = new Elements();
+                        previousSection.elements.add(createTitleElement(mainElement, previousSection));
+                        previousSection.elements.addAll(accumulatedElements);
+
+                        accumulatedElements.clear();
+                        previousSection = section;
+                    }
+                }
+
+                if (!isSeparator) {
+                    accumulatedElements.add(directChild);
+                }
+
+            }
+
+            previousSection.elements = new Elements();
+            previousSection.elements.add(createTitleElement(mainElement, previousSection));
+            previousSection.elements.addAll(accumulatedElements);
+
+            this.sections.addAll(chapterSectionList);
+
             this.html = mainElement.html();
+        }
+
+        private Element createTitleElement(final Element mainElement, final ChapterSection previousSection) {
+            Element divOverall = new Element(Tag.valueOf("div"), mainElement.baseUri());
+
+            if (previousSection.icons != null) {
+                for (Element icon : previousSection.icons) {
+                    icon.attr("class", "blog-pic-right-align");
+                    divOverall.appendChild(icon);
+                }
+            }
+
+            Element h1Title = new Element(Tag.valueOf("h1"), mainElement.baseUri());
+            h1Title.text(String.format("%s - %s", this.title, previousSection.sectionTitle));
+
+            divOverall.appendChild(h1Title);
+
+            return divOverall;
+        }
+
+        private Element findParentElementBefore(final Element titleElement, final Element mainElement) {
+            Element parent = titleElement.parent();
+            Element last = parent;
+            while (!parent.equals(mainElement)) {
+                last = parent;
+                parent = parent.parent();
+            }
+            return last;
+        }
+
+        private Element findParentElementOfTag(final Element titleElement, final String tagToFind) {
+            Element parent = titleElement.parent();
+            while (parent != null) {
+                if (parent.tagName().equalsIgnoreCase(tagToFind)) {
+                    return parent;
+                }
+                parent = parent.parent();
+            }
+            return null;
         }
     }
 }

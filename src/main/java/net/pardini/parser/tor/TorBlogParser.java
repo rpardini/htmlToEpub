@@ -128,16 +128,6 @@ public class TorBlogParser extends BaseHtmlParser {
             Document document = parseDocumentFromURL(url, mappedFixes);
             Element mainElement = document.select("div.content div.text").get(0);
 
-            // Fix all a href links.
-            Elements allLinks = mainElement.select("a");
-            for (Element oneLink : allLinks) {
-                String href = StringUtils.trimToNull(oneLink.attr("abs:href"));
-                if (href != null) {
-                    log.debug(String.format("Found link: %s", href));
-                    // @TODO: actually does nothing with the links. What should we do?
-                }
-            }
-
             Elements allImages = mainElement.select("img");
             for (Element oneImage : allImages) {
                 String src = StringUtils.trimToNull(oneImage.attr("abs:src"));

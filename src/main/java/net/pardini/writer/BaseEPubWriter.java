@@ -47,7 +47,7 @@ public class BaseEPubWriter {
     public Resource getHtmlForContentRes(String content, String contentTitle, final String url) {
         String href = String.format("%s.html", contentTitle);
         href = StringUtils.replace(href, ":", "");
-        log.info(String.format("Writing HREF... '%s'", href));
+        log.debug(String.format("Writing HREF... '%s'", href));
         return new Resource(this.getHtmlDocForContent(content, contentTitle, url), href);
     }
 
@@ -119,12 +119,19 @@ public class BaseEPubWriter {
         }
     }
 
-    protected void startBook(final String title, final Author author, final Author contributor) {
+    protected void startBook(final String title, final Author author, final Author contributor, final String extraDesc) {
         Book book = new Book();
         book.getMetadata().addTitle(title);
         book.getMetadata().addAuthor(author);
         book.getMetadata().addContributor(contributor);
         book.getMetadata().addDate(new nl.siegmann.epublib.domain.Date(new Date(), nl.siegmann.epublib.domain.Date.Event.CREATION));
+
+
+        book.addSection("About this book", getHtmlForContentRes(
+                String.format("<h1>%s</h1><h2>by %s %s</h2>%s", title, author.getFirstname(), author.getLastname(), extraDesc),
+                "about_this_book", "http://"
+        ));
+
 
         this.title = title;
         this.book = book;

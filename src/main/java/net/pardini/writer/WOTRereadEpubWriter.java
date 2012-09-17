@@ -30,7 +30,31 @@ public class WOTRereadEpubWriter extends BaseEPubWriter {
             for (TorBlogParser.Chapter chapter : rereadBook.chapterList) {
                 log.debug(String.format("Writing chapter %s: %s", rereadBook.bookTitle, chapter.title));
 
-                book.addSection(bookEntry, chapter.title, getHtmlForContentRes(chapter.html, String.format("%s - %s", rereadBook.bookTitle, chapter.title), chapter.url));
+                TorBlogParser.ChapterSection firstSection = chapter.sections.get(0);
+
+                TOCReference firstSectionTOCReference = book.addSection(
+                        bookEntry,
+                        String.format("%s - %s", chapter.title, firstSection.sectionTitle),
+                        getHtmlForContentRes(
+                                firstSection.getHTML(),
+                                String.format("%s - %s - %s", rereadBook.bookTitle, chapter.title, firstSection.sectionTitle),
+                                chapter.url
+                        )
+                );
+
+
+                for (TorBlogParser.ChapterSection section : chapter.sections) {
+                    if (section.equals(firstSection)) continue;
+                    book.addSection(
+                            firstSectionTOCReference,
+                            String.format("%s - %s", chapter.title, section.sectionTitle),
+                            getHtmlForContentRes(
+                                    section.getHTML(),
+                                    String.format("%s - %s - %s", rereadBook.bookTitle, chapter.title, section.sectionTitle),
+                                    chapter.url
+                            )
+                    );
+                }
 
                 addImagesForChapter(chapter);
             }
@@ -42,7 +66,10 @@ public class WOTRereadEpubWriter extends BaseEPubWriter {
         Author author = new Author("Leigh", "Butler");
         Author contributor = new Author("Ricardo", "Pardini");
 
-        startBook(title, author, contributor);
+        startBook(title, author, contributor,
+                "<p>This e-book is a compendium of blog posts written by Leigh Butler on <a href=\"http://www.tor.com\">tor.com</a>.</p>" +
+                        "<p>All credit and copyright to Leigh Butler and Holtzbrinck Publishers, LLC (Macmillan).</p>" +
+                        "<p>Please check out the full <a href='http://www.tor.com/features/series/wot-reread'>WoT Re-read index</a> for news.</p>");
     }
 
     private void addImagesForChapter(final TorBlogParser.Chapter chapter) {
@@ -52,13 +79,27 @@ public class WOTRereadEpubWriter extends BaseEPubWriter {
     }
 
     public void writeIndividualBookEpub(final TorBlogParser.RereadBook rereadBook) throws Exception {
-        startWOTBook(String.format("WOT Reread - %s", rereadBook.bookTitle));
+        startWOTBook(String.format("WoT Reread - %s", rereadBook.bookTitle));
 
         for (TorBlogParser.Chapter chapter : rereadBook.chapterList) {
             log.debug(String.format("Writing chapter %s: %s", rereadBook.bookTitle, chapter.title));
 
+            TorBlogParser.ChapterSection firstSection = chapter.sections.get(0);
+
+            TOCReference firstSectionTOCReference = book.addSection(
+                    String.format("%s - %s", chapter.title, firstSection.sectionTitle),
+                    getHtmlForContentRes(
+                            firstSection.getHTML(),
+                            String.format("%s - %s - %s", rereadBook.bookTitle, chapter.title, firstSection.sectionTitle),
+                            chapter.url
+                    )
+            );
+
+
             for (TorBlogParser.ChapterSection section : chapter.sections) {
+                if (section.equals(firstSection)) continue;
                 book.addSection(
+                        firstSectionTOCReference,
                         String.format("%s - %s", chapter.title, section.sectionTitle),
                         getHtmlForContentRes(
                                 section.getHTML(),

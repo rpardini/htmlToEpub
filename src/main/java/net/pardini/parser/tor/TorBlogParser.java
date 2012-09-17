@@ -151,11 +151,11 @@ public class TorBlogParser extends BaseHtmlParser {
                 if (sectionTitleText == null) {
                     continue;
                 }
-                log.info(String.format("Found title: %s - %s - %s", this.title, sectionTitleText, this.url));
+                log.debug(String.format("Found title: %s - %s - %s", this.title, sectionTitleText, this.url));
 
                 Element parentParagraph = findParentElementBefore(titleElement, mainElement);
                 if (parentParagraph != null) {
-                    log.info("Found parent..." + parentParagraph.html());
+                    log.debug("Found parent..." + parentParagraph.html());
 
                     ChapterSection section = new ChapterSection();
                     section.sectionTitle = sectionTitleText;
@@ -163,6 +163,7 @@ public class TorBlogParser extends BaseHtmlParser {
 
                     section.icons = parentParagraph.select("img");
 
+                    // @TODO: sometimes there's more content to the 'separator' than just the title and the links, which is being lost right now.
 
                     chapterSectionList.add(section);
 
@@ -173,7 +174,7 @@ public class TorBlogParser extends BaseHtmlParser {
             Elements accumulatedElements = new Elements();
 
             ChapterSection previousSection = new ChapterSection();
-            previousSection.sectionTitle = "Main";
+            previousSection.sectionTitle = "Intro";
 
             this.sections = new ArrayList<ChapterSection>();
             this.sections.add(previousSection);
@@ -186,7 +187,7 @@ public class TorBlogParser extends BaseHtmlParser {
                     if (section.separatorElement.equals(directChild)) {
                         isSeparator = true;
 
-                        log.info("Found splitter element...");
+                        log.debug("Found splitter element...");
 
                         previousSection.elements = new Elements();
                         previousSection.elements.add(createTitleElement(mainElement, previousSection));

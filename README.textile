@@ -1,0 +1,3 @@
+* Quickly hacked together using jsoup and epublib; currently generates books for the Wheel of Time Re-Read by Leigh Butler.
+* It requires Java JDK 1.6 and Maven 3.
+* Everything it does is run through the unit tests, so "mvn clean test" should perform everything.

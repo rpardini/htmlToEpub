@@ -22,7 +22,7 @@
 
 
     <logger name="net.pardini">
-        <level value="INFO"/>
+        <level value="DEBUG"/>
         <!-- change to DEBUG for really uninteresting messages -->
     </logger>
 

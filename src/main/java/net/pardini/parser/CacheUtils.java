@@ -62,12 +62,12 @@ public class CacheUtils {
     }
 
     private static File getCacheFileById(final String id) {
-        File tempDir = new File("C:\\temp\\caches");
+        File tempDir = new File("target/caches");
         if (!tempDir.exists()) {
             if (!tempDir.mkdirs()) throw new RuntimeException("Unable to create temp dir.");
         }
         String fullFileName = String.format("%s%s%s.html", tempDir.getAbsolutePath(), File.separator, id);
-        log.debug(String.format("Cache filename for '%s' is '%s'", id, fullFileName));
+        log.info(String.format("Cache filename for '%s' is '%s'", id, fullFileName));
         return new File(fullFileName);
     }
 

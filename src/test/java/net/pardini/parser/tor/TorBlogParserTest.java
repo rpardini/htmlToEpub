@@ -1,7 +1,8 @@
 package net.pardini.parser.tor;
 
-import org.testng.Assert;
-import org.testng.annotations.Test;
+
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Map;
 

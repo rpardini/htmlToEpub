@@ -50,14 +50,14 @@ public class TorBlogParser extends BaseHtmlParser {
     }
 
     public Map<String, Map<String, String>> parseIndex() throws Exception {
-        String htmlURL = "http://www.tor.com/features/series/wot-reread";
+        String htmlURL = "https://www.tor.com/series/wot-reread/";
         Document document = parseDocumentFromURL(htmlURL);
 
         Map<String, Map<String, String>> fullMap = new LinkedHashMap<String, Map<String, String>>();
 
-        Elements elements = document.select("div.group_with_image");
+        Elements elements = document.select("div.series-book");
         for (Element element : elements) {
-            Element titleElement = element.select("div.title em").get(0);
+            Element titleElement = element.select("div.series-title-book em").get(0);
             String bookTitle = titleElement.text();
 
             Map<String, String> urlMap = new LinkedHashMap<String, String>();

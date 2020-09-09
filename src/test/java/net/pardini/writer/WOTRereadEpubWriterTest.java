@@ -1,9 +1,7 @@
 package net.pardini.writer;
 
 import net.pardini.parser.tor.TorBlogParser;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
+import org.junit.Test;
 /**
  * Created with IntelliJ IDEA.
  * User: Pardini
@@ -15,7 +13,7 @@ public class WOTRereadEpubWriterTest {
 
     private TorBlogParser.RereadBooks fullBook;
 
-    @BeforeMethod
+    @org.junit.Before
     public void setUp() throws Exception {
         fullBook = new TorBlogParser().parseFullWOTRereadFromTorWebSite();
     }

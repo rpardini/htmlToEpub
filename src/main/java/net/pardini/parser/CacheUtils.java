@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 
 /**
@@ -19,7 +20,7 @@ public class CacheUtils {
 // ------------------------------ FIELDS ------------------------------
 
     private final static Logger log = LoggerFactory.getLogger(CacheUtils.class);
-    private final static Charset utf8 = Charset.forName("UTF8");
+    private final static Charset utf8 = StandardCharsets.UTF_8;
 
 // -------------------------- STATIC METHODS --------------------------
 

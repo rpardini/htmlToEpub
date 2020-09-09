@@ -12,10 +12,9 @@ import org.slf4j.LoggerFactory;
 import org.w3c.tidy.Node;
 import org.w3c.tidy.Tidy;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -30,16 +29,15 @@ public class BaseEPubWriter {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
     protected final Set<String> images;
+    private final Charset utf8 = StandardCharsets.UTF_8;
     protected String cssResource;
     protected String title;
     protected Book book;
 
-    private final Charset utf8 = Charset.forName("UTF8");
-
 // --------------------------- CONSTRUCTORS ---------------------------
 
     public BaseEPubWriter() {
-        images = new LinkedHashSet<String>();
+        images = new LinkedHashSet<>();
     }
 
 // -------------------------- OTHER METHODS --------------------------
@@ -85,7 +83,7 @@ public class BaseEPubWriter {
 
         String output = out.toString();
         String[] errLines = output.split("\\n");
-        List<String> realErrors = new ArrayList<String>();
+        List<String> realErrors = new ArrayList<>();
         for (String errLine : errLines) {
             errLine = StringUtils.trimToNull(errLine);
             if (errLine == null) continue;
@@ -106,7 +104,7 @@ public class BaseEPubWriter {
                     StringUtils.contains(errLine, "no warnings or errors were found")
 
 
-                    ) {
+            ) {
                 continue;
             }
             realErrors.add(errLine);
@@ -132,7 +130,6 @@ public class BaseEPubWriter {
                 "about_this_book", "http://"
         ));
 
-
         this.title = title;
         this.book = book;
     }
@@ -140,42 +137,18 @@ public class BaseEPubWriter {
     protected void writeBookToFile() throws Exception {
         new File(String.format("target/html/%s", title)).mkdirs();
 
-        // Now get and add all images!
-        Resource largestImageResource = null;
-        int largestImageSize = 0;
-
-
-
         for (String imageURL : images) {
             Resource resource = new Resource(CacheUtils.getURLCachedByteArray(imageURL), CacheUtils.getIDForImage(imageURL));
             book.addResource(resource);
-
-            BufferedImage bimg = ImageIO.read(new ByteArrayInputStream(resource.getData()));
-            int width          = bimg.getWidth();
-            int height         = bimg.getHeight();
-            int pixelsSquared = width * height;
-
-            if (pixelsSquared > largestImageSize) {
-                largestImageSize = pixelsSquared;
-                largestImageResource = resource;
-            }
         }
-
-        // Set cover image
-        if (largestImageResource != null) {
-            book.setCoverImage(largestImageResource);
-        }
-
 
         book.addResource(new Resource(getClass().getClassLoader().getResourceAsStream(cssResource), "styles.css"));
-
 
         Map<String, Resource> resourceMap = book.getResources().getResourceMap();
         for (String resourceID : resourceMap.keySet()) {
             log.debug(String.format("Resource ID: %s", resourceID));
             FileUtils.writeByteArrayToFile(new File(String.format("target/html/%s/%s", title, resourceID)), resourceMap.get(resourceID).getData());
         }
-
 
         // Create EpubWriter
         EpubWriter epubWriter = new EpubWriter();

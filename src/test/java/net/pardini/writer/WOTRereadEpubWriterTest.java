@@ -2,6 +2,7 @@ package net.pardini.writer;
 
 import net.pardini.parser.tor.TorBlogParser;
 import org.junit.Test;
+
 /**
  * Created with IntelliJ IDEA.
  * User: Pardini

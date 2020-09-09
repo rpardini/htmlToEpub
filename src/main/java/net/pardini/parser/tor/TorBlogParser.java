@@ -51,14 +51,14 @@ public class TorBlogParser extends BaseHtmlParser {
         String htmlURL = "https://www.tor.com/series/wot-reread/";
         Document document = parseDocumentFromURL(htmlURL);
 
-        Map<String, Map<String, String>> fullMap = new LinkedHashMap<String, Map<String, String>>();
+        Map<String, Map<String, String>> fullMap = new LinkedHashMap<>();
 
         Elements elements = document.select("div.series-book");
         for (Element element : elements) {
             Element titleElement = element.select("div.series-title-book em").get(0);
             String bookTitle = titleElement.text();
 
-            Map<String, String> urlMap = new LinkedHashMap<String, String>();
+            Map<String, String> urlMap = new LinkedHashMap<>();
 
             Elements links = element.select("a");
             for (Element link : links) {
@@ -93,12 +93,12 @@ public class TorBlogParser extends BaseHtmlParser {
     }
 
     public class RereadBooks {
-        public List<RereadBook> bookList = new ArrayList<RereadBook>();
+        public List<RereadBook> bookList = new ArrayList<>();
     }
 
     public class RereadBook {
         public final String bookTitle;
-        public List<Chapter> chapterList = new ArrayList<Chapter>();
+        public List<Chapter> chapterList = new ArrayList<>();
 
 
         public RereadBook(final String bookTitle) {
@@ -110,7 +110,7 @@ public class TorBlogParser extends BaseHtmlParser {
         public final String bookName;
         public final String title;
         public final String url;
-        public Set<String> images = new HashSet<String>();
+        public Set<String> images = new HashSet<>();
         public List<ChapterSection> sections;
 
         public Chapter(final String bookName, final String title, final String url) {
@@ -121,7 +121,7 @@ public class TorBlogParser extends BaseHtmlParser {
         }
 
         public void parseHTML() throws Exception {
-            Map<String, String> mappedFixes = new HashMap<String, String>();
+            Map<String, String> mappedFixes = new HashMap<>();
             mappedFixes.put("<span style=\"font-size:14px;&ldquo;>", "<span style=\"font-size:14px;\">");
             mappedFixes.put("<span style=\"font-size: 14px;&ldquo;>", "<span style=\"font-size:14px;\">");
             mappedFixes.put("<span new=\"\" roman=\"\" style=\"font-family: Georgia;\" times=\"\"> </span>", "");
@@ -151,7 +151,7 @@ public class TorBlogParser extends BaseHtmlParser {
             }
 
 
-            List<ChapterSection> chapterSectionList = new ArrayList<ChapterSection>();
+            List<ChapterSection> chapterSectionList = new ArrayList<>();
 
             Elements allPossibleTitleElements = new Elements();
             allPossibleTitleElements.addAll(mainElement.select("p strong u, p u strong, p span strong, p strong span"));
@@ -186,7 +186,7 @@ public class TorBlogParser extends BaseHtmlParser {
             ChapterSection previousSection = new ChapterSection();
             previousSection.sectionTitle = "Intro";
 
-            this.sections = new ArrayList<ChapterSection>();
+            this.sections = new ArrayList<>();
             this.sections.add(previousSection);
 
             boolean foundEnd = false;

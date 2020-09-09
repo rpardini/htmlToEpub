@@ -28,8 +28,6 @@ public class TorBlogParser extends BaseHtmlParser {
 
     public RereadBooks parseFullWOTRereadFromTorWebSite() throws Exception {
         Map<String, Map<String, String>> fullMap = this.parseIndex();
-
-        Map<String, List<Chapter>> fullBook = new LinkedHashMap<String, List<Chapter>>();
         RereadBooks rereadBooks = new RereadBooks();
 
         for (String bookName : fullMap.keySet()) {
@@ -68,9 +66,9 @@ public class TorBlogParser extends BaseHtmlParser {
                 String fullId = link.text();
 
                 if (href.contains("redux")) {
-                    log.warn("Ignoring REDUX link: {}", href);
+                    log.debug("Ignoring REDUX link: {}", href);
                 } else {
-                    log.debug(String.format("Adding '%s' '%s' to url '%s'", bookTitle, fullId, href));
+                    log.info(String.format("Adding '%s' '%s' to url '%s'", bookTitle, fullId, href));
                     urlMap.put(fullId, href);
                 }
             }
@@ -112,7 +110,6 @@ public class TorBlogParser extends BaseHtmlParser {
         public final String bookName;
         public final String title;
         public final String url;
-        public String html;
         public Set<String> images = new HashSet<String>();
         public List<ChapterSection> sections;
 
@@ -131,16 +128,25 @@ public class TorBlogParser extends BaseHtmlParser {
 
 
             Document document = parseDocumentFromURL(url, mappedFixes);
-            Element mainElement = document.select("div#content div.entry-content").get(0);
+            Element mainElement = document.select("div#content article div.entry-content").get(0);
 
             Elements allImages = mainElement.select("img");
             for (Element oneImage : allImages) {
                 String src = StringUtils.trimToNull(oneImage.attr("abs:src"));
                 if (src != null) {
-                    log.debug(String.format("Found image link: %s", src));
+                    log.debug(String.format("Found image link (via normal src): %s", src));
                     String md5 = CacheUtils.getIDForImage(src);
                     oneImage.attr("src", md5);
                     images.add(src);
+                }
+
+                String srcSet = StringUtils.trimToNull(oneImage.attr("abs:srcset"));
+                if (srcSet != null) {
+                    log.debug(String.format("Found image link (via srcset): %s", src));
+                    String md5 = CacheUtils.getIDForImage(srcSet);
+                    oneImage.attr("srcset", "");
+                    oneImage.attr("src", md5);
+                    images.add(srcSet);
                 }
             }
 
@@ -148,8 +154,7 @@ public class TorBlogParser extends BaseHtmlParser {
             List<ChapterSection> chapterSectionList = new ArrayList<ChapterSection>();
 
             Elements allPossibleTitleElements = new Elements();
-            allPossibleTitleElements.addAll(mainElement.select("p strong u"));
-            allPossibleTitleElements.addAll(mainElement.select("p u strong"));
+            allPossibleTitleElements.addAll(mainElement.select("p strong u, p u strong, p span strong, p strong span"));
 
             for (Element titleElement : allPossibleTitleElements) {
                 String sectionTitleText = StringUtils.trimToNull(titleElement.text());
@@ -184,7 +189,15 @@ public class TorBlogParser extends BaseHtmlParser {
             this.sections = new ArrayList<ChapterSection>();
             this.sections.add(previousSection);
 
+            boolean foundEnd = false;
+
             for (Element directChild : directChildren) {
+                if (directChild.hasClass("post-end-spacer")) {
+                    log.info("Found end marking!");
+                    foundEnd = true;
+                }
+
+
                 boolean isSeparator = false;
 
                 for (ChapterSection section : chapterSectionList) {
@@ -204,7 +217,9 @@ public class TorBlogParser extends BaseHtmlParser {
                 }
 
                 if (!isSeparator) {
-                    accumulatedElements.add(directChild);
+                    if (!foundEnd) {
+                        accumulatedElements.add(directChild);
+                    }
                 }
 
             }
@@ -214,8 +229,6 @@ public class TorBlogParser extends BaseHtmlParser {
             previousSection.elements.addAll(accumulatedElements);
 
             this.sections.addAll(chapterSectionList);
-
-            this.html = mainElement.html();
         }
 
         private Element createTitleElement(final Element mainElement, final ChapterSection previousSection) {

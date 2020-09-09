@@ -138,7 +138,7 @@ public class BaseEPubWriter {
     }
 
     protected void writeBookToFile() throws Exception {
-        new File(String.format("target\\html\\%s", title)).mkdirs();
+        new File(String.format("target/html/%s", title)).mkdirs();
 
         // Now get and add all images!
         Resource largestImageResource = null;
@@ -154,8 +154,6 @@ public class BaseEPubWriter {
             int width          = bimg.getWidth();
             int height         = bimg.getHeight();
             int pixelsSquared = width * height;
-
-            if (pixelsSquared >= 344*258) continue;
 
             if (pixelsSquared > largestImageSize) {
                 largestImageSize = pixelsSquared;
@@ -175,7 +173,7 @@ public class BaseEPubWriter {
         Map<String, Resource> resourceMap = book.getResources().getResourceMap();
         for (String resourceID : resourceMap.keySet()) {
             log.debug(String.format("Resource ID: %s", resourceID));
-            FileUtils.writeByteArrayToFile(new File(String.format("target\\html\\%s\\%s", title, resourceID)), resourceMap.get(resourceID).getData());
+            FileUtils.writeByteArrayToFile(new File(String.format("target/html/%s/%s", title, resourceID)), resourceMap.get(resourceID).getData());
         }
 
 
@@ -183,6 +181,6 @@ public class BaseEPubWriter {
         EpubWriter epubWriter = new EpubWriter();
 
         // Write the Book as Epub
-        epubWriter.write(book, new FileOutputStream(String.format("target\\%s.epub", title)));
+        epubWriter.write(book, new FileOutputStream(String.format("target/%s.epub", title)));
     }
 }

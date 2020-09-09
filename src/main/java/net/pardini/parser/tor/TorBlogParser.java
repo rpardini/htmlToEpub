@@ -66,12 +66,17 @@ public class TorBlogParser extends BaseHtmlParser {
             for (Element link : links) {
                 String href = link.attr("abs:href");
                 String fullId = link.text();
-                log.debug(String.format("Adding '%s' '%s' to url '%s'", bookTitle, fullId, href));
 
-                urlMap.put(fullId, href);
+                if (href.contains("redux")) {
+                    log.warn("Ignoring REDUX link: {}", href);
+                } else {
+                    log.debug(String.format("Adding '%s' '%s' to url '%s'", bookTitle, fullId, href));
+                    urlMap.put(fullId, href);
+                }
             }
 
-            fullMap.put(bookTitle, urlMap);
+            if (urlMap.size() > 0)
+                fullMap.put(bookTitle, urlMap);
         }
         return fullMap;
     }
@@ -126,7 +131,7 @@ public class TorBlogParser extends BaseHtmlParser {
 
 
             Document document = parseDocumentFromURL(url, mappedFixes);
-            Element mainElement = document.select("div.content div.text").get(0);
+            Element mainElement = document.select("div#content div.entry-content").get(0);
 
             Elements allImages = mainElement.select("img");
             for (Element oneImage : allImages) {

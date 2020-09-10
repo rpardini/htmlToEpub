@@ -1,12 +1,15 @@
 package net.pardini.parser;
 
+import nl.siegmann.epublib.service.MediatypeService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.net.URLConnection;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -25,7 +28,19 @@ public class CacheUtils {
 // -------------------------- STATIC METHODS --------------------------
 
     public static String getIDForImage(final String src) {
-        return String.format("%s.jpg", CacheUtils.getHashForString(src));
+        // gotta get the extension right from the media-type
+        // desktop-based viewers (calibre etc) and ibooks will accept anything
+        // Kobo will not render GIFs if they are called jpeg
+        // epublib will set the resource content-type from the extension automatically
+        // so here I do the reverse, guess from the bytes, resolve ext using epublib service
+        try {
+            String contentType = URLConnection.guessContentTypeFromStream(new ByteArrayInputStream(CacheUtils.getURLCachedByteArray(src)));
+            String extension = MediatypeService.getMediaTypeByName(contentType).getDefaultExtension();
+            log.debug("Content-type for {} is {} and thus ext is {}", src, contentType, extension);
+            return String.format("%s%s", CacheUtils.getHashForString(src), extension);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
     }
 
     private static String getHashForString(final String id) {

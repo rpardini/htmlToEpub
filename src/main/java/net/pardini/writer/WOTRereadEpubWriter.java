@@ -69,7 +69,7 @@ public class WOTRereadEpubWriter extends BaseEPubWriter {
         startBook(title, author, contributor,
                 "<p>This e-book is a compendium of blog posts written by Leigh Butler on <a href=\"http://www.tor.com\">tor.com</a>.</p>" +
                         "<p>All credit and copyright to Leigh Butler and Holtzbrinck Publishers, LLC (Macmillan).</p>" +
-                        "<p>This is extraction v2!</p>");
+                        "<p>This is extraction v3!</p>");
     }
 
     private void addImagesForChapter(final TorBlogParser.Chapter chapter) {

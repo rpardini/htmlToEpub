@@ -234,17 +234,17 @@ public class TorBlogParser extends BaseHtmlParser {
         private Element createTitleElement(final Element mainElement, final ChapterSection previousSection) {
             Element divOverall = new Element(Tag.valueOf("div"), mainElement.baseUri());
 
-            if (previousSection.icons != null) {
-                for (Element icon : previousSection.icons) {
-                    icon.attr("class", "blog-pic-right-align");
-                    divOverall.appendChild(icon);
-                }
-            }
-
             Element h1Title = new Element(Tag.valueOf("h1"), mainElement.baseUri());
             h1Title.text(String.format("%s - %s", this.title, previousSection.sectionTitle));
 
             divOverall.appendChild(h1Title);
+
+            if (previousSection.icons != null) {
+                for (Element icon : previousSection.icons) {
+                    icon.attr("class", "icon");
+                    divOverall.appendChild(icon);
+                }
+            }
 
             return divOverall;
         }

@@ -4,8 +4,9 @@ blockquote {
 }
 
 
-img.blog-pic-right-align  {
-    float: left;
+img.icon  {
     padding-right: 1em;
     padding-bottom: 1em;
+    width: 300px;
+    height: auto;
 }
